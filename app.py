@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 import random
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -39,5 +40,11 @@ def gerar_numero():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Criar tabelas se não existirem
-    app.run(debug=True)
+        db.create_all()
+    
+    # Verifica se estamos em ambiente de produção
+    if os.environ.get('ENV') == 'production':
+        from waitress import serve
+        serve(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    else:
+        app.run(debug=True)
